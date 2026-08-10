@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+celery
+redis
+ffmpeg-python
+openai-whisper
+psycopg2-binary
+pgvector
+sentence-transformers
+groq
+python-multipart
+aiofiles
+python-dotenv

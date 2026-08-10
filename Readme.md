@@ -76,41 +76,35 @@ cp .env.example .env
 # fill in your GROQ_API_KEY in .env
 ```
 
-### 2. Start infrastructure
+### 2. Run Entire Stack with Docker (Recommended)
 
 ```bash
+# Build and start all services (PostgreSQL, Redis, Backend API, Worker, and Next.js Frontend)
+docker compose up -d --build
+
+# Run database schema migration
+Get-Content backend/db/schema.sql | docker exec -i video-to-transcript-postgres-1 psql -U postgres -d transcripts
+```
+
+Access the Next.js Frontend at `http://localhost:3000` and the API at `http://localhost:8000`.
+
+---
+
+### Alternative: Run Manually (Local Development)
+
+```bash
+# 1. Start Postgres & Redis containers
 docker compose up -d postgres redis
-```
 
-### 3. Run database migrations
-
-```bash
-docker exec -i <postgres-container-name> \
-  psql -U postgres -d transcripts < backend/db/schema.sql
-```
-
-### 4. Set up Python environment
-
-```bash
+# 2. Run backend API & Celery worker
 cd backend
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-
-pip install fastapi uvicorn celery redis \
-  ffmpeg-python openai-whisper \
-  psycopg2-binary pgvector \
-  sentence-transformers groq \
-  python-multipart aiofiles python-dotenv
-```
-
-### 5. Run the backend
-
-```bash
-# Terminal 1 — API
+.\venv\Scripts\activate
 uvicorn main:app --reload --port 8000
-
-# Terminal 2 — Celery worker
 celery -A worker worker --loglevel=info
+
+# 3. Run Next.js frontend
+cd ../frontend
+npm run dev
 ```
 
 ---

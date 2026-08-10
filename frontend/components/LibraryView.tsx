@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { getLibrary, Job } from '@/lib/api';
 import { JobStatusBadge } from './JobStatusBadge';
 import { formatDate } from '@/lib/utils';
-import { RefreshCw, FileText, Film, Search, ArrowUpDown, AlertCircle } from 'lucide-react';
+import { RefreshCw, FileText, Film, Search, AlertCircle } from 'lucide-react';
 
 interface Props {
   onSelectTranscript: (transcriptId: string, filename: string) => void;
@@ -40,102 +40,100 @@ export const LibraryView: React.FC<Props> = ({ onSelectTranscript }) => {
   );
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-6">
-      <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
-        {/* Header & Controls */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="w-full max-w-5xl mx-auto space-y-5">
+      <div className="card-dark rounded-2xl p-6 space-y-5">
+        {/* Header & Filter */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-4">
           <div>
-            <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-              <Film className="w-5 h-5 text-indigo-400" />
+            <h2 className="text-lg font-bold text-zinc-100 flex items-center gap-2">
+              <Film className="w-4 h-4 text-zinc-400" />
               <span>Transcript Library</span>
             </h2>
-            <p className="text-xs text-slate-400 mt-1">Manage and inspect all processed video transcripts</p>
+            <p className="text-xs text-zinc-400 mt-0.5">Manage and inspect all processed video transcripts</p>
           </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            {/* Filter Search */}
-            <div className="relative flex-1 sm:w-64">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-60">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
               <input
                 type="text"
-                placeholder="Filter files..."
+                placeholder="Filter transcripts..."
                 value={searchFilter}
                 onChange={(e) => setSearchFilter(e.target.value)}
-                className="w-full pl-9 pr-4 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 transition-all"
+                className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-all font-mono"
               />
             </div>
 
             <button
               onClick={fetchLibrary}
               disabled={isLoading}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold transition-all disabled:opacity-50"
+              className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 text-xs transition-all disabled:opacity-50"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
 
-        {/* Content Table / List */}
+        {/* Content Table */}
         {isLoading ? (
-          <div className="py-20 text-center flex flex-col items-center justify-center gap-3 text-slate-400">
-            <RefreshCw className="w-8 h-8 animate-spin text-indigo-400" />
-            <p className="text-sm font-medium">Loading library items...</p>
+          <div className="py-16 text-center flex flex-col items-center justify-center gap-2 text-zinc-400">
+            <RefreshCw className="w-6 h-6 animate-spin text-zinc-400" />
+            <p className="text-xs font-medium">Loading library items...</p>
           </div>
         ) : error ? (
-          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <div className="p-3.5 rounded-lg bg-red-950/40 border border-red-500/30 text-red-300 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{error}</span>
           </div>
         ) : filteredJobs.length === 0 ? (
-          <div className="py-16 text-center bg-slate-950/40 rounded-2xl border border-slate-800 p-8">
-            <p className="text-slate-400 text-sm">No video transcripts found in library.</p>
-            <p className="text-slate-600 text-xs mt-1">Upload a video to start processing!</p>
+          <div className="py-12 text-center bg-zinc-950/40 rounded-xl border border-zinc-800/80 p-6">
+            <p className="text-zinc-400 text-xs">No video transcripts found in library.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950/40">
+          <div className="overflow-x-auto rounded-xl border border-zinc-800/80 bg-zinc-950/40">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 text-slate-400 text-xs uppercase font-semibold bg-slate-950/80">
-                  <th className="py-3.5 px-4">Video File</th>
-                  <th className="py-3.5 px-4">Job Status</th>
-                  <th className="py-3.5 px-4">Uploaded</th>
-                  <th className="py-3.5 px-4 text-right">Actions</th>
+                <tr className="border-b border-zinc-800/80 text-zinc-400 text-[11px] uppercase font-mono bg-zinc-900/60">
+                  <th className="py-3 px-4">Video File</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">Uploaded</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 text-xs">
+              <tbody className="divide-y divide-zinc-800/50 text-xs">
                 {filteredJobs.map((job) => (
-                  <tr key={job.id} className="hover:bg-slate-900/50 transition-colors">
-                    <td className="py-4 px-4 font-medium text-slate-200">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-slate-800 text-indigo-300">
-                          <Film className="w-4 h-4" />
+                  <tr key={job.id} className="hover:bg-zinc-900/40 transition-colors">
+                    <td className="py-3.5 px-4 font-medium text-zinc-200">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-1.5 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-400">
+                          <Film className="w-3.5 h-3.5" />
                         </div>
                         <div>
                           <p className="truncate max-w-xs">{job.filename}</p>
-                          <p className="text-[10px] text-slate-500 font-mono">{job.id}</p>
+                          <p className="text-[10px] text-zinc-500 font-mono">{job.id}</p>
                         </div>
                       </div>
                     </td>
 
-                    <td className="py-4 px-4">
+                    <td className="py-3.5 px-4">
                       <JobStatusBadge status={job.status} size="sm" />
                     </td>
 
-                    <td className="py-4 px-4 text-slate-400 font-mono">
+                    <td className="py-3.5 px-4 text-zinc-400 font-mono text-[11px]">
                       {formatDate(job.created_at)}
                     </td>
 
-                    <td className="py-4 px-4 text-right">
+                    <td className="py-3.5 px-4 text-right">
                       {job.transcript_id ? (
                         <button
                           onClick={() => onSelectTranscript(job.transcript_id!, job.filename)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-violet-500/20 transition-all"
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-zinc-100 hover:bg-zinc-200 text-zinc-950 font-semibold text-xs transition-all shadow-sm"
                         >
                           <FileText className="w-3.5 h-3.5" />
                           <span>View Transcript</span>
                         </button>
                       ) : (
-                        <span className="text-slate-600 text-xs italic">In Pipeline</span>
+                        <span className="text-zinc-500 text-xs font-mono">In Pipeline</span>
                       )}
                     </td>
                   </tr>

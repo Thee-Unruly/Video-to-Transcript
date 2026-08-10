@@ -1,10 +1,23 @@
 // frontend/app/layout.tsx
 import type { Metadata } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Video2Transcript - Vectorized Video Transcripts & Semantic Search",
-  description: "AI-powered video processing pipeline with OpenAI Whisper, Groq Llama 3.3, and PostgreSQL pgvector semantic search.",
+  title: "Video2Transcript • Video Search & Pipeline",
+  description: "FastAPI, OpenAI Whisper, Groq Llama 3.3, and PostgreSQL pgvector video transcript intelligence.",
 };
 
 export default function RootLayout({
@@ -13,11 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="bg-slate-950 text-slate-100 antialiased min-h-screen relative selection:bg-indigo-500 selection:text-white">
-        {/* Ambient Glowing Background Orbs */}
-        <div className="fixed top-0 left-1/4 w-[600px] h-[600px] bg-violet-600/10 rounded-full blur-[140px] pointer-events-none -z-10" />
-        <div className="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none -z-10" />
+    <html lang="en" className={`dark ${inter.variable} ${mono.variable}`}>
+      <body className="font-sans bg-[#09090b] text-[#fafafa] antialiased min-h-screen relative selection:bg-zinc-800 selection:text-white">
         {children}
       </body>
     </html>

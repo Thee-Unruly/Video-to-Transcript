@@ -2,11 +2,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Video, Sparkles, Search, Library, Upload, Activity } from 'lucide-react';
+import { Video, Search, Library, Upload, HelpCircle, Terminal } from 'lucide-react';
 
 interface NavbarProps {
-  activeTab: 'upload' | 'library' | 'search';
-  setActiveTab: (tab: 'upload' | 'library' | 'search') => void;
+  activeTab: 'upload' | 'library' | 'search' | 'guide';
+  setActiveTab: (tab: 'upload' | 'library' | 'search' | 'guide') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
@@ -27,80 +27,76 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-slate-950/70 border-b border-slate-800/80">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Brand Logo */}
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-gradient-to-tr from-violet-600 via-indigo-500 to-cyan-400 text-white shadow-lg shadow-indigo-500/20">
-            <Video className="w-5 h-5" />
+    <header className="sticky top-0 z-40 w-full bg-[#09090b]/90 backdrop-blur-md border-b border-zinc-800/60">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+        {/* Brand */}
+        <div className="flex items-center gap-2.5">
+          <div className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-100">
+            <Video className="w-4 h-4" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-lg text-slate-100 tracking-tight">Video2Transcript</span>
-              <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-md bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-400 border border-emerald-500/30">
-                Groq AI
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 hidden sm:block">Vectorized Video Transcripts & Search</p>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-sm text-zinc-100 tracking-tight">Video2Transcript</span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
+              Groq Llama 3.3
+            </span>
           </div>
         </div>
 
         {/* Navigation Tabs */}
-        <nav className="flex items-center gap-1 bg-slate-900/80 p-1.5 rounded-xl border border-slate-800">
+        <nav className="flex items-center gap-1 bg-zinc-900/60 p-1 rounded-lg border border-zinc-800/80">
           <button
             onClick={() => setActiveTab('upload')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all ${
               activeTab === 'upload'
-                ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md shadow-violet-500/20'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                ? 'bg-zinc-100 text-zinc-950 font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40'
             }`}
           >
-            <Upload className="w-4 h-4" />
+            <Upload className="w-3.5 h-3.5" />
             <span>Upload</span>
           </button>
 
           <button
             onClick={() => setActiveTab('library')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all ${
               activeTab === 'library'
-                ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md shadow-violet-500/20'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                ? 'bg-zinc-100 text-zinc-950 font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40'
             }`}
           >
-            <Library className="w-4 h-4" />
+            <Library className="w-3.5 h-3.5" />
             <span>Library</span>
           </button>
 
           <button
             onClick={() => setActiveTab('search')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all ${
               activeTab === 'search'
-                ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md shadow-violet-500/20'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                ? 'bg-zinc-100 text-zinc-950 font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40'
             }`}
           >
-            <Search className="w-4 h-4" />
+            <Search className="w-3.5 h-3.5" />
             <span>Search</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('guide')}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all ${
+              activeTab === 'guide'
+                ? 'bg-zinc-100 text-zinc-950 font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40'
+            }`}
+          >
+            <HelpCircle className="w-3.5 h-3.5" />
+            <span>Architecture Guide</span>
           </button>
         </nav>
 
-        {/* Server Health Status Badge */}
-        <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs">
-          <span className="relative flex h-2 w-2">
-            <span
-              className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                isBackendAlive ? 'bg-emerald-400' : 'bg-red-400'
-              }`}
-            ></span>
-            <span
-              className={`relative inline-flex rounded-full h-2 w-2 ${
-                isBackendAlive ? 'bg-emerald-500' : 'bg-red-500'
-              }`}
-            ></span>
-          </span>
-          <span className="text-slate-400 font-medium">
-            {isBackendAlive === null ? 'Connecting...' : isBackendAlive ? 'API Online' : 'API Offline'}
-          </span>
+        {/* API Health Indicator */}
+        <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-zinc-400">
+          <span className={`w-2 h-2 rounded-full ${isBackendAlive ? 'bg-emerald-500' : 'bg-red-500'}`} />
+          <span>{isBackendAlive === null ? 'Connecting...' : isBackendAlive ? 'API Online' : 'API Offline'}</span>
         </div>
       </div>
     </header>

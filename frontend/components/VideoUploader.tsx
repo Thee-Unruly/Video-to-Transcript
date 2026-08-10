@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { UploadCloud, FileVideo, AlertCircle, ArrowRight, CheckCircle2, RefreshCw, Sparkles, Film } from 'lucide-react';
+import { UploadCloud, FileVideo, AlertCircle, ArrowRight, CheckCircle2, RefreshCw, Film } from 'lucide-react';
 import { uploadVideo, getJobStatus, Job } from '@/lib/api';
 import { JobStatusBadge } from './JobStatusBadge';
 
@@ -10,13 +10,13 @@ interface Props {
   onJobCompleted?: (job: Job) => void;
 }
 
-const STAGES: { id: Job['status']; label: string; desc: string }[] = [
-  { id: 'pending', label: 'Upload & Queue', desc: 'Receiving video file' },
-  { id: 'extracting', label: 'FFmpeg Audio', desc: 'Stripping 16kHz mono WAV' },
-  { id: 'transcribing', label: 'OpenAI Whisper', desc: 'Generating raw timestamps' },
-  { id: 'cleaning', label: 'Groq Llama 3.3', desc: 'Refining grammar & fillers' },
-  { id: 'embedding', label: 'Vectorization', desc: 'Embedding 384-dim chunks' },
-  { id: 'done', label: 'Ready', desc: 'Indexed in PostgreSQL' },
+const STAGES: { id: Job['status']; label: string; humanDesc: string }[] = [
+  { id: 'pending', label: 'Queued', humanDesc: 'Receiving file and initializing pipeline' },
+  { id: 'extracting', label: 'Audio Extract', humanDesc: 'FFmpeg extracting 16kHz mono audio' },
+  { id: 'transcribing', label: 'Whisper ASR', humanDesc: 'OpenAI Whisper generating transcript timestamps' },
+  { id: 'cleaning', label: 'Groq LLM', humanDesc: 'Groq Llama 3.3 cleaning punctuation & fillers' },
+  { id: 'embedding', label: 'Vector Index', humanDesc: 'Embedding 384-dim chunks into pgvector' },
+  { id: 'done', label: 'Completed', humanDesc: 'Transcript processed & ready for search' },
 ];
 
 export const VideoUploader: React.FC<Props> = ({ onJobCompleted }) => {
@@ -65,7 +65,6 @@ export const VideoUploader: React.FC<Props> = ({ onJobCompleted }) => {
     }
   };
 
-  // Poll job status until done or failed
   useEffect(() => {
     if (!currentJob || currentJob.status === 'done' || currentJob.status === 'failed') {
       if (currentJob?.status === 'done') {
@@ -100,31 +99,30 @@ export const VideoUploader: React.FC<Props> = ({ onJobCompleted }) => {
   };
 
   const currentStageIdx = currentJob ? getStageIndex(currentJob.status) : 0;
+  const progressPercent = currentJob
+    ? Math.min(100, Math.round(((currentStageIdx + 1) / STAGES.length) * 100))
+    : 0;
+
+  const activeStageConfig = STAGES[currentStageIdx] || STAGES[0];
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
-      {/* File Upload Box */}
-      <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-48 h-48 bg-gradient-to-br from-violet-600/10 to-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="text-center max-w-xl mx-auto mb-6">
-          <h2 className="text-2xl font-bold text-slate-100 tracking-tight flex items-center justify-center gap-2">
-            <span>Upload Video File</span>
-            <Sparkles className="w-5 h-5 text-indigo-400" />
-          </h2>
-          <p className="text-slate-400 text-sm mt-1">
-            Upload any video (.mp4, .mov, .avi, .mkv) to extract, transcribe with Whisper, refine with Groq Llama 3.3, and index for semantic search.
+      {/* Upload Box */}
+      <div className="card-dark rounded-2xl p-6 sm:p-8 space-y-6">
+        <div className="text-center max-w-xl mx-auto space-y-1">
+          <h2 className="text-xl font-bold text-zinc-100">Upload Video File</h2>
+          <p className="text-xs text-zinc-400">
+            Upload MP4, MOV, AVI, or MKV to process through FFmpeg, Whisper, Groq Llama 3.3, and pgvector.
           </p>
         </div>
 
-        {/* Drag & Drop Target */}
         <div
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer relative group ${
+          className={`border border-dashed rounded-xl p-8 text-center transition-all cursor-pointer relative ${
             file
-              ? 'border-indigo-500/50 bg-indigo-500/5'
-              : 'border-slate-700/80 hover:border-violet-500/50 hover:bg-slate-800/40 bg-slate-950/40'
+              ? 'border-zinc-500 bg-zinc-900/80'
+              : 'border-zinc-800 hover:border-zinc-700 bg-zinc-950/60'
           }`}
         >
           <input
@@ -137,27 +135,23 @@ export const VideoUploader: React.FC<Props> = ({ onJobCompleted }) => {
 
           {!file ? (
             <div className="flex flex-col items-center justify-center gap-3">
-              <div className="p-4 rounded-2xl bg-slate-800/80 text-violet-400 border border-slate-700 group-hover:scale-105 group-hover:text-indigo-300 transition-all shadow-lg">
-                <UploadCloud className="w-8 h-8" />
+              <div className="p-3 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300">
+                <UploadCloud className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-slate-200 font-semibold text-base">Drag & drop your video file here</p>
-                <p className="text-slate-500 text-xs mt-1">or click to browse your file system</p>
-              </div>
-              <div className="flex items-center gap-2 mt-2 text-[11px] text-slate-400 font-mono bg-slate-900/80 px-3 py-1 rounded-full border border-slate-800">
-                <Film className="w-3.5 h-3.5 text-indigo-400" />
-                <span>MP4 • MOV • AVI • MKV</span>
+                <p className="text-zinc-200 font-medium text-sm">Click or drag video file here</p>
+                <p className="text-zinc-500 text-xs mt-0.5">MP4, MOV, AVI, MKV up to 500MB</p>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-xl bg-slate-900/90 border border-slate-800">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-3.5 rounded-lg bg-zinc-900/90 border border-zinc-800">
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-violet-500/20 text-violet-300 border border-violet-500/30">
-                  <FileVideo className="w-6 h-6" />
+                <div className="p-2.5 rounded-lg bg-zinc-800 text-zinc-200 border border-zinc-700">
+                  <FileVideo className="w-5 h-5" />
                 </div>
                 <div className="text-left">
-                  <p className="text-slate-200 font-medium text-sm truncate max-w-xs">{file.name}</p>
-                  <p className="text-slate-500 text-xs">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                  <p className="text-zinc-200 font-medium text-xs truncate max-w-xs">{file.name}</p>
+                  <p className="text-zinc-500 text-[11px]">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
                 </div>
               </div>
 
@@ -169,7 +163,7 @@ export const VideoUploader: React.FC<Props> = ({ onJobCompleted }) => {
                       setFile(null);
                       setCurrentJob(null);
                     }}
-                    className="px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-all"
+                    className="px-3 py-1 text-xs text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded transition-all"
                   >
                     Change
                   </button>
@@ -181,17 +175,17 @@ export const VideoUploader: React.FC<Props> = ({ onJobCompleted }) => {
                     handleUpload();
                   }}
                   disabled={isUploading}
-                  className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 hover:from-violet-500 hover:to-cyan-400 text-white text-xs font-semibold shadow-lg shadow-indigo-500/25 disabled:opacity-50 transition-all"
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-950 text-xs font-semibold shadow-sm disabled:opacity-50 transition-all"
                 >
                   {isUploading ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                       <span>Processing...</span>
                     </>
                   ) : (
                     <>
                       <span>Start Pipeline</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </>
                   )}
                 </button>
@@ -200,28 +194,39 @@ export const VideoUploader: React.FC<Props> = ({ onJobCompleted }) => {
           )}
         </div>
 
-        {/* Error Alert */}
         {error && (
-          <div className="mt-4 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <div className="p-3 rounded-lg bg-red-950/40 border border-red-500/30 text-red-300 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
       </div>
 
-      {/* Live Pipeline Processing Tracker */}
+      {/* Execution Tracker */}
       {currentJob && (
-        <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
+        <div className="card-dark rounded-2xl p-6 space-y-5">
+          <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
             <div>
-              <h3 className="text-base font-bold text-slate-200">Pipeline Execution Progress</h3>
-              <p className="text-xs text-slate-400 font-mono mt-0.5">Job ID: {currentJob.id}</p>
+              <h3 className="text-sm font-bold text-zinc-100">Pipeline Execution Progress</h3>
+              <p className="text-[11px] font-mono text-zinc-500 mt-0.5">Job ID: {currentJob.id}</p>
             </div>
-            <JobStatusBadge status={currentJob.status} size="lg" />
+            <JobStatusBadge status={currentJob.status} size="md" />
           </div>
 
-          {/* Stepper Display */}
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs font-mono text-zinc-400">
+              <span className="text-zinc-200 font-medium">{activeStageConfig.humanDesc}</span>
+              <span>{progressPercent}%</span>
+            </div>
+            <div className="w-full h-1.5 bg-zinc-950 rounded-full overflow-hidden border border-zinc-800">
+              <div
+                className="h-full bg-zinc-100 rounded-full transition-all duration-300"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
             {STAGES.map((stage, idx) => {
               const isCompleted = idx < currentStageIdx || currentJob.status === 'done';
               const isCurrent = idx === currentStageIdx && currentJob.status !== 'done' && currentJob.status !== 'failed';
@@ -230,44 +235,32 @@ export const VideoUploader: React.FC<Props> = ({ onJobCompleted }) => {
               return (
                 <div
                   key={stage.id}
-                  className={`p-3.5 rounded-2xl border transition-all text-center flex flex-col justify-between ${
+                  className={`p-3 rounded-xl border text-center flex flex-col justify-between ${
                     isCompleted
-                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                      ? 'bg-zinc-900/80 border-emerald-500/40 text-emerald-300'
                       : isCurrent
-                      ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-200 ring-2 ring-indigo-500/30'
+                      ? 'bg-zinc-800 border-zinc-500 text-zinc-100 font-semibold'
                       : isFailed
-                      ? 'bg-red-500/10 border-red-500/30 text-red-300'
-                      : 'bg-slate-950/40 border-slate-800/80 text-slate-500'
+                      ? 'bg-red-950/60 border-red-500/40 text-red-300'
+                      : 'bg-zinc-950/40 border-zinc-800/60 text-zinc-600'
                   }`}
                 >
-                  <div className="flex justify-center mb-2">
+                  <div className="flex justify-center mb-1.5">
                     {isCompleted ? (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                     ) : isCurrent ? (
-                      <RefreshCw className="w-5 h-5 text-indigo-400 animate-spin" />
+                      <RefreshCw className="w-4 h-4 text-zinc-200 animate-spin" />
                     ) : isFailed ? (
-                      <AlertCircle className="w-5 h-5 text-red-400" />
+                      <AlertCircle className="w-4 h-4 text-red-400" />
                     ) : (
-                      <span className="w-5 h-5 rounded-full border border-slate-700 text-[10px] font-bold flex items-center justify-center">
-                        {idx + 1}
-                      </span>
+                      <span className="text-[10px] font-mono text-zinc-600">{idx + 1}</span>
                     )}
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold leading-tight">{stage.label}</p>
-                    <p className="text-[10px] opacity-70 mt-1">{stage.desc}</p>
-                  </div>
+                  <p className="text-[11px] font-medium leading-tight">{stage.label}</p>
                 </div>
               );
             })}
           </div>
-
-          {currentJob.error && (
-            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
-              <p className="font-semibold">Pipeline Error:</p>
-              <p className="font-mono mt-1">{currentJob.error}</p>
-            </div>
-          )}
         </div>
       )}
     </div>
