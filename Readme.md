@@ -76,17 +76,14 @@ cp .env.example .env
 # fill in your GROQ_API_KEY in .env
 ```
 
-### 2. Run Entire Stack with Docker (Recommended)
+### 2. Run Entire Stack with 1 Command (Recommended)
 
 ```bash
-# Build and start all services (PostgreSQL, Redis, Backend API, Worker, and Next.js Frontend)
+# Build and start all 5 services automatically (PostgreSQL + pgvector, Redis, Backend API, Worker, and Next.js Frontend)
 docker compose up -d --build
-
-# Run database schema migration
-Get-Content backend/db/schema.sql | docker exec -i video-to-transcript-postgres-1 psql -U postgres -d transcripts
 ```
 
-Access the Next.js Frontend at `http://localhost:3000` and the API at `http://localhost:8000`.
+That's it! The database schema initializes automatically. Access the **Next.js Frontend UI** at `http://localhost:3000` and the **FastAPI Backend** at `http://localhost:8000`.
 
 ---
 
