@@ -9,7 +9,7 @@ A pipeline that converts video files to searchable, vectorized transcripts — w
 1. **Upload a video** — any common format (mp4, mov, avi, mkv)
 2. **Extract audio** — FFmpeg strips audio to 16kHz mono WAV
 3. **Transcribe** — OpenAI Whisper runs locally, returns text + timestamps
-4. **Clean** — Claude (claude-sonnet-4-6) fixes punctuation, removes filler words
+4. **Clean** — Groq (Llama 3.3 70B) fixes punctuation, removes filler words
 5. **Vectorize** — chunks are embedded with `all-MiniLM-L6-v2` (384-dim)
 6. **Store** — transcript + embeddings saved to PostgreSQL with pgvector
 7. **Search** — semantic similarity search across all transcripts
@@ -23,7 +23,7 @@ A pipeline that converts video files to searchable, vectorized transcripts — w
 | Backend API | FastAPI |
 | Task queue | Celery + Redis |
 | Transcription | OpenAI Whisper (local) |
-| Transcript cleaning | Anthropic Claude API |
+| Transcript cleaning | Groq API (`llama-3.3-70b-versatile`) |
 | Embeddings | sentence-transformers (`all-MiniLM-L6-v2`) |
 | Database | PostgreSQL + pgvector |
 | Frontend | Next.js (App Router) |
@@ -42,7 +42,7 @@ video-to-transcript/
 │   ├── pipeline/
 │   │   ├── extractor.py      # video → audio (FFmpeg)
 │   │   ├── transcriber.py    # audio → transcript (Whisper)
-│   │   ├── cleaner.py        # raw → clean text (Claude)
+│   │   ├── cleaner.py        # raw → clean text (Groq)
 │   │   └── embedder.py       # text → vectors + chunking
 │   └── db/
 │       ├── connection.py     # psycopg2 helpers
@@ -65,7 +65,7 @@ video-to-transcript/
   - Mac: `brew install ffmpeg`
   - Ubuntu: `sudo apt install ffmpeg`
   - Windows: [ffmpeg.org](https://ffmpeg.org/download.html) → add to PATH
-- Anthropic API key
+- Groq API key
 
 ### 1. Clone and configure
 
@@ -73,7 +73,7 @@ video-to-transcript/
 git clone <your-repo-url>
 cd video-to-transcript
 cp .env.example .env
-# fill in your ANTHROPIC_API_KEY in .env
+# fill in your GROQ_API_KEY in .env
 ```
 
 ### 2. Start infrastructure
@@ -99,7 +99,7 @@ source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install fastapi uvicorn celery redis \
   ffmpeg-python openai-whisper \
   psycopg2-binary pgvector \
-  sentence-transformers anthropic \
+  sentence-transformers groq \
   python-multipart aiofiles python-dotenv
 ```
 
@@ -148,7 +148,7 @@ POSTGRES_DB=transcripts
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=secret
 REDIS_URL=redis://localhost:6379/0
-ANTHROPIC_API_KEY=your_key_here
+GROQ_API_KEY=your_key_here
 UPLOAD_DIR=./uploads
 ```
 

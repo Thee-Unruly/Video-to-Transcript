@@ -1,11 +1,11 @@
 # backend/pipeline/cleaner.py
-import anthropic, os
+from groq import Groq
+import os
 
 def clean_transcript(raw_text: str) -> str:
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-    msg = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=4096,
+    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    completion = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
         messages=[{
             "role": "user",
             "content": (
@@ -13,6 +13,8 @@ def clean_transcript(raw_text: str) -> str:
                 "(um, uh, like), fix run-on sentences. Return only the cleaned text.\n\n"
                 + raw_text
             )
-        }]
+        }],
+        temperature=0.2,
+        max_tokens=4096,
     )
-    return msg.content[0].text
+    return completion.choices[0].message.content
